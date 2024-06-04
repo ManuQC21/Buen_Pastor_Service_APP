@@ -59,7 +59,7 @@ public class EquipoController {
                     .headers(headers)
                     .body(bytes);
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
+            return ResponseEntity.internalServerError()
                     .body(null);
         }
     }
