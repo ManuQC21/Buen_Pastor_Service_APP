@@ -10,8 +10,8 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
-@Table(name = "Equipo")
-public class Equipo {
+@Table(name = "equipo")
+public class equipo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,20 +53,20 @@ public class Equipo {
 
     @ManyToOne
     @JoinColumn(name = "responsable_id")
-    private Empleado responsable;
+    private empleado responsable;
 
     @ManyToOne
     @JoinColumn(name = "ubicacion_id")
-    private Ubicacion ubicacion;
+    private BUEN_PASTOR.Entity.ubicacion ubicacion;
 
-    public Equipo() {
+    public equipo() {
     }
 
-    public Equipo(int id) {
+    public equipo(int id) {
         this.id = id;
     }
 
-    public Equipo(int id, String tipoEquipo, String codigoBarra, String codigoPatrimonial, String descripcion, String estado, LocalDate fechaCompra, String marca, String modelo, String nombreEquipo, String numeroOrden, String serie, Empleado responsable, Ubicacion ubicacion) {
+    public equipo(int id, String tipoEquipo, String codigoBarra, String codigoPatrimonial, String descripcion, String estado, LocalDate fechaCompra, String marca, String modelo, String nombreEquipo, String numeroOrden, String serie, empleado responsable, BUEN_PASTOR.Entity.ubicacion ubicacion) {
         this.id = id;
         this.tipoEquipo = tipoEquipo;
         this.codigoBarra = codigoBarra;

@@ -2,7 +2,7 @@ package BUEN_PASTOR.Controller;
 
 import BUEN_PASTOR.Service.EmpleadoService;
 import BUEN_PASTOR.utils.GenericResponse;
-import BUEN_PASTOR.Entity.Empleado;
+import BUEN_PASTOR.Entity.empleado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +19,8 @@ public class EmpleadoController {
     private EmpleadoService empleadoService;
 
     @GetMapping("/listar")
-    public ResponseEntity<GenericResponse<List<Empleado>>> listarTodosLosEmpleados() {
-        GenericResponse<List<Empleado>> response = empleadoService.listarTodosLosEmpleados();
+    public ResponseEntity<GenericResponse<List<empleado>>> listarTodosLosEmpleados() {
+        GenericResponse<List<empleado>> response = empleadoService.listarTodosLosEmpleados();
         return ResponseEntity.ok(response);
     }
 }

@@ -1,7 +1,7 @@
 package BUEN_PASTOR.Controller;
 
 import BUEN_PASTOR.Service.EquipoService;
-import BUEN_PASTOR.Entity.Equipo;
+import BUEN_PASTOR.Entity.equipo;
 import BUEN_PASTOR.utils.GenericResponse;
 import BUEN_PASTOR.utils.Global;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +22,12 @@ public class EquipoController {
     private EquipoService equipoService;
 
     @PostMapping("/agregar")
-    public GenericResponse<Equipo> addEquipo(@RequestBody Equipo equipo) {
+    public GenericResponse<equipo> addEquipo(@RequestBody equipo equipo) {
         return equipoService.addEquipo(equipo);
     }
 
     @PutMapping("/modificar")
-    public GenericResponse<Equipo> updateEquipo(@RequestBody Equipo equipo) {
+    public GenericResponse<equipo> updateEquipo(@RequestBody equipo equipo) {
         return equipoService.updateEquipo(equipo);
     }
 
@@ -37,13 +37,13 @@ public class EquipoController {
     }
 
     @GetMapping("/listar")
-    public GenericResponse<List<Equipo>> listAllEquipos() {
+    public GenericResponse<List<equipo>> listAllEquipos() {
         return equipoService.findAllEquipos();
     }
 
     @PostMapping("/escanearCodigoBarra")
-    public ResponseEntity<GenericResponse<Equipo>> escanearCodigoBarra(@RequestParam("file") MultipartFile file) {
-        GenericResponse<Equipo> response = equipoService.scanAndCopyBarcodeData(file);
+    public ResponseEntity<GenericResponse<equipo>> escanearCodigoBarra(@RequestParam("file") MultipartFile file) {
+        GenericResponse<equipo> response = equipoService.scanAndCopyBarcodeData(file);
         return response.getRpta() == Global.RPTA_OK ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
@@ -59,29 +59,29 @@ public class EquipoController {
                     .headers(headers)
                     .body(bytes);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError()
+            return ResponseEntity.badRequest()
                     .body(null);
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GenericResponse<Equipo>> getEquipoById(@PathVariable int id) {
-        GenericResponse<Equipo> response = equipoService.getEquipoById(id);
+    public ResponseEntity<GenericResponse<equipo>> getEquipoById(@PathVariable int id) {
+        GenericResponse<equipo> response = equipoService.getEquipoById(id);
         return ResponseEntity.status(response.getRpta() == Global.RPTA_OK ? 200 : 404).body(response);
     }
 
     @GetMapping("/filtro/nombre")
-    public ResponseEntity<GenericResponse<List<Equipo>>> filtroPorNombre(@RequestParam String nombreEquipo) {
+    public ResponseEntity<GenericResponse<List<equipo>>> filtroPorNombre(@RequestParam String nombreEquipo) {
         return ResponseEntity.ok(equipoService.filtroPorNombre(nombreEquipo));
     }
 
     @GetMapping("/filtro/codigoPatrimonial")
-    public ResponseEntity<GenericResponse<List<Equipo>>> filtroCodigoPatrimonial(@RequestParam String codigoPatrimonial) {
+    public ResponseEntity<GenericResponse<List<equipo>>> filtroCodigoPatrimonial(@RequestParam String codigoPatrimonial) {
         return ResponseEntity.ok(equipoService.filtroCodigoPatrimonial(codigoPatrimonial));
     }
 
     @GetMapping("/filtro/fechaCompra")
-    public ResponseEntity<GenericResponse<List<Equipo>>> filtroFechaCompraBetween(
+    public ResponseEntity<GenericResponse<List<equipo>>> filtroFechaCompraBetween(
             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate fechaInicio,
             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate fechaFin) {
         return ResponseEntity.ok(equipoService.filtroFechaCompraBetween(fechaInicio, fechaFin));

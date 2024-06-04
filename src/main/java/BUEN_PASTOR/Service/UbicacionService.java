@@ -1,6 +1,6 @@
 package BUEN_PASTOR.Service;
 
-import BUEN_PASTOR.Entity.Ubicacion;
+import BUEN_PASTOR.Entity.ubicacion;
 import BUEN_PASTOR.Repository.UbicacionRepository;
 import BUEN_PASTOR.utils.GenericResponse;
 import BUEN_PASTOR.utils.Global;
@@ -15,9 +15,9 @@ public class UbicacionService {
     @Autowired
     private UbicacionRepository ubicacionRepository;
 
-    public GenericResponse<List<Ubicacion>> listarTodasLasUbicaciones() {
+    public GenericResponse<List<ubicacion>> listarTodasLasUbicaciones() {
         try {
-            List<Ubicacion> ubicaciones = new ArrayList<>();
+            List<ubicacion> ubicaciones = new ArrayList<>();
             ubicacionRepository.findAll().forEach(ubicaciones::add);
             return new GenericResponse<>(Global.TIPO_DATA, Global.RPTA_OK, Global.OPERACION_CORRECTA, ubicaciones);
         } catch (Exception e) {

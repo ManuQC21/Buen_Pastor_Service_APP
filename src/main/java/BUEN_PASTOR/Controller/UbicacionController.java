@@ -1,6 +1,6 @@
 package BUEN_PASTOR.Controller;
 
-import BUEN_PASTOR.Entity.Ubicacion;
+import BUEN_PASTOR.Entity.ubicacion;
 import BUEN_PASTOR.Service.UbicacionService;
 import BUEN_PASTOR.utils.GenericResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +19,8 @@ public class UbicacionController {
     private UbicacionService ubicacionService;
 
     @GetMapping("/listar")
-    public ResponseEntity<GenericResponse<List<Ubicacion>>> listarTodasLasUbicaciones() {
-        GenericResponse<List<Ubicacion>> response = ubicacionService.listarTodasLasUbicaciones();
+    public ResponseEntity<GenericResponse<List<ubicacion>>> listarTodasLasUbicaciones() {
+        GenericResponse<List<ubicacion>> response = ubicacionService.listarTodasLasUbicaciones();
         return ResponseEntity.ok(response);
     }
 }

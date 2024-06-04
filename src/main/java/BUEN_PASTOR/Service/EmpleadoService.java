@@ -1,6 +1,6 @@
 package BUEN_PASTOR.Service;
 
-import BUEN_PASTOR.Entity.Empleado;
+import BUEN_PASTOR.Entity.empleado;
 import BUEN_PASTOR.Repository.EmpleadoRepository;
 import BUEN_PASTOR.utils.GenericResponse;
 import BUEN_PASTOR.utils.Global;
@@ -15,9 +15,9 @@ public class EmpleadoService {
     @Autowired
     private EmpleadoRepository empleadoRepository;
 
-    public GenericResponse<List<Empleado>> listarTodosLosEmpleados() {
+    public GenericResponse<List<empleado>> listarTodosLosEmpleados() {
         try {
-            List<Empleado> empleados = new ArrayList<>();
+            List<empleado> empleados = new ArrayList<>();
             empleadoRepository.findAll().forEach(empleados::add);
             return new GenericResponse<>(Global.TIPO_DATA, Global.RPTA_OK, Global.OPERACION_CORRECTA, empleados);
         } catch (Exception e) {

@@ -8,8 +8,8 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Entity
-@Table(name = "Usuario")
-public class Usuario {
+@Table(name = "usuario")
+public class usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -20,16 +20,16 @@ public class Usuario {
     @Column
     private boolean vigencia;
     @OneToOne
-    private Empleado empleado;
+    private BUEN_PASTOR.Entity.empleado empleado;
 
-    public Usuario() {
+    public usuario() {
     }
 
-    public Usuario(int id) {
+    public usuario(int id) {
         this.id = id;
     }
 
-    public Usuario(int id, String correo, String clave, boolean vigencia, Empleado empleado) {
+    public usuario(int id, String correo, String clave, boolean vigencia, BUEN_PASTOR.Entity.empleado empleado) {
         this.id = id;
         this.correo = correo;
         this.clave = clave;

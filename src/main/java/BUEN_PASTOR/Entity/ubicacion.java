@@ -8,8 +8,8 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Entity
-@Table(name = "Ubicacion")
-public class Ubicacion {
+@Table(name = "ubicacion")
+public class ubicacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,14 +21,14 @@ public class Ubicacion {
     @Column(name = "ubicacion_fisica", nullable = false, length = 255)
     private String ubicacionFisica;
 
-    public Ubicacion() {
+    public ubicacion() {
     }
 
-    public Ubicacion(Integer id) {
+    public ubicacion(Integer id) {
         this.id = id;
     }
 
-    public Ubicacion(Integer id, String ambiente, String ubicacionFisica) {
+    public ubicacion(Integer id, String ambiente, String ubicacionFisica) {
         this.id = id;
         this.ambiente = ambiente;
         this.ubicacionFisica = ubicacionFisica;

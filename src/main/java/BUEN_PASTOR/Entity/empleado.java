@@ -7,8 +7,8 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Entity
-@Table(name = "Empleado")
-public class Empleado {
+@Table(name = "empleado")
+public class empleado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,14 +21,14 @@ public class Empleado {
     private String cargo;
 
     // Constructor vacío
-    public Empleado() {
+    public empleado() {
     }
 
-    public Empleado(int id) {
+    public empleado(int id) {
         this.id = id;
     }
 
-    public Empleado(int id, String nombre, String cargo) {
+    public empleado(int id, String nombre, String cargo) {
         this.id = id;
         this.nombre = nombre;
         this.cargo = cargo;
