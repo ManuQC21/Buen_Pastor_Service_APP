@@ -1,8 +1,8 @@
 package BUEN_PASTOR.Service;
 
-import BUEN_PASTOR.Entity.empleado;
-import BUEN_PASTOR.Entity.equipo;
-import BUEN_PASTOR.Entity.ubicacion;
+import BUEN_PASTOR.Entity.Teacher;
+import BUEN_PASTOR.Entity.Equipment;
+import BUEN_PASTOR.Entity.Location;
 import BUEN_PASTOR.Repository.EquipoRepository;
 import BUEN_PASTOR.utils.GenericResponse;
 import BUEN_PASTOR.utils.Global;
@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -26,11 +27,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.util.IOUtils;
-import java.io.FileInputStream;
 
+import java.io.FileInputStream;
 
 
 @Service
@@ -40,10 +42,10 @@ public class EquipoService {
     @Autowired
     private EquipoRepository equipoRepository;
 
-    public GenericResponse<equipo> addEquipo(equipo equipo) {
+    public GenericResponse<Equipment> addEquipo(Equipment equipo) {
         try {
-            equipo.setCodigoBarra(generateRandomBarcode(12));
-            BUEN_PASTOR.Entity.equipo savedEquipo = equipoRepository.save(equipo);
+            equipo.setBarcode(generateRandomBarcode(12));
+            Equipment savedEquipo = equipoRepository.save(equipo);
             return new GenericResponse<>(Global.TIPO_CORRECTO, Global.RPTA_OK, "Equipo registrado exitosamente.", savedEquipo);
         } catch (Exception e) {
             return new GenericResponse<>(Global.TIPO_ERROR, Global.RPTA_ERROR, "Error al registrar el equipo: " + e.getMessage(), null);
@@ -60,37 +62,38 @@ public class EquipoService {
         return sb.toString();
     }
 
-    public GenericResponse<equipo> updateEquipo(equipo equipo) {
+    public GenericResponse<Equipment> updateEquipo(Equipment equipo) {
         if (equipo.getId() == 0) {
             return new GenericResponse<>(Global.TIPO_ERROR, Global.RPTA_ERROR, "ID de equipo no proporcionado.", null);
         }
 
-        Optional<BUEN_PASTOR.Entity.equipo> existingEquipo = equipoRepository.findById(equipo.getId());
+        Optional<Equipment> existingEquipo = equipoRepository.findById(equipo.getId());
         if (!existingEquipo.isPresent()) {
             return new GenericResponse<>(Global.TIPO_ERROR, Global.RPTA_ERROR, "Equipo no encontrado.", null);
         }
 
         try {
-            BUEN_PASTOR.Entity.equipo updatedEquipo = existingEquipo.get();
+            Equipment updatedEquipo = existingEquipo.get();
 
-            // Actualizando solo los campos permitidos
-            updatedEquipo.setTipoEquipo(equipo.getTipoEquipo());
-            updatedEquipo.setDescripcion(equipo.getDescripcion());
-            updatedEquipo.setEstado(equipo.getEstado());
-            updatedEquipo.setFechaCompra(equipo.getFechaCompra()); // Asumiendo que ya es LocalDate
-            updatedEquipo.setMarca(equipo.getMarca());
-            updatedEquipo.setModelo(equipo.getModelo());
-            updatedEquipo.setNombreEquipo(equipo.getNombreEquipo());
-            updatedEquipo.setNumeroOrden(equipo.getNumeroOrden());
-            updatedEquipo.setSerie(equipo.getSerie());
+            // Updating only allowed fields
+            updatedEquipo.setEquipmentType(equipo.getEquipmentType());
+            updatedEquipo.setDescription(equipo.getDescription());
+            updatedEquipo.setStatus(equipo.getStatus());
+            updatedEquipo.setPurchaseDate(equipo.getPurchaseDate()); // Assuming it is already LocalDate
+            updatedEquipo.setBrand(equipo.getBrand());
+            updatedEquipo.setModel(equipo.getModel());
+            updatedEquipo.setEquipmentName(equipo.getEquipmentName());
+            updatedEquipo.setOrderNumber(equipo.getOrderNumber());
+            updatedEquipo.setSerial(equipo.getSerial());
 
-            // Asignar responsable y ubicación si se proporcionan
-            if (equipo.getResponsable() != null && equipo.getResponsable().getId() > 0) {
-                updatedEquipo.setResponsable(new empleado(equipo.getResponsable().getId()));
+            // Assigning responsible and location if provided
+            if (equipo.getResponsible() != null && equipo.getResponsible().getId() > 0) {
+                updatedEquipo.setResponsible(new Teacher(equipo.getResponsible().getId()));
             }
-            if (equipo.getUbicacion() != null && equipo.getUbicacion().getId() > 0) {
-                updatedEquipo.setUbicacion(new ubicacion(equipo.getUbicacion().getId()));
+            if (equipo.getLocation() != null && equipo.getLocation().getId() > 0) {
+                updatedEquipo.setLocation(new Location(equipo.getLocation().getId()));
             }
+
 
             equipoRepository.save(updatedEquipo);
             return new GenericResponse<>(Global.TIPO_CORRECTO, Global.RPTA_OK, "Equipo actualizado exitosamente.", updatedEquipo);
@@ -111,43 +114,56 @@ public class EquipoService {
         }
     }
 
-    public GenericResponse<List<equipo>> findAllEquipos() {
+    public GenericResponse<List<Equipment>> findAllEquipos() {
         try {
-            List<equipo> equipos = (List<equipo>) equipoRepository.findAll();
+            List<Equipment> equipos = (List<Equipment>) equipoRepository.findAll();
             return new GenericResponse<>(Global.TIPO_CORRECTO, Global.RPTA_OK, "Listado completo de equipos.", equipos);
         } catch (Exception e) {
             return new GenericResponse<>(Global.TIPO_ERROR, Global.RPTA_ERROR, "Error al obtener el listado de equipos: " + e.getMessage(), null);
         }
     }
 
-    public GenericResponse<equipo> scanAndCopyBarcodeData(MultipartFile file) {
+    public GenericResponse<Equipment> scanAndCopyBarcodeData(MultipartFile file) {
         try (InputStream inputStream = file.getInputStream()) {
             BufferedImage image = ImageIO.read(inputStream);
             if (image == null) {
+                // Log de error si la imagen es nula o el formato no es compatible
+                System.out.println("La imagen cargada es nula o el formato no es compatible.");
                 return new GenericResponse<>(Global.TIPO_ERROR, Global.RPTA_WARNING, "La imagen cargada es nula o el formato no es compatible.", null);
             }
+
             LuminanceSource source = new BufferedImageLuminanceSource(image);
             BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
             Result result = new MultiFormatReader().decode(bitmap);
-            String barcodeText = result.getText();
+            String barcodeText = result.getText().trim();
 
-            Optional<equipo> informacion = equipoRepository.findByCodigoBarra(barcodeText);
+            // Log del código de barras decodificado
+            System.out.println("Código de barras decodificado (limpio): '" + barcodeText + "'");
+
+            Optional<Equipment> informacion = equipoRepository.findByBarcode(barcodeText);
             if (informacion.isPresent()) {
+                // Log si el código de barras se encuentra en la base de datos
+                System.out.println("Código de barras encontrado en la base de datos: " + barcodeText);
                 return new GenericResponse<>(Global.TIPO_CORRECTO, Global.RPTA_OK, "Escaneo de Código de Barras correcto", informacion.get());
             } else {
+                // Log si el código de barras no se encuentra en la base de datos
+                System.out.println("Código de barras no encontrado en la base de datos: " + barcodeText);
                 return new GenericResponse<>(Global.TIPO_CUIDADO, Global.RPTA_WARNING, "Código de barras no encontrado", null);
             }
         } catch (Exception e) {
+            // Log del error
+            System.out.println("Error al procesar el archivo: " + e.getMessage());
             return new GenericResponse<>(Global.TIPO_ERROR, Global.RPTA_ERROR, "Error al procesar el archivo: " + e.getMessage(), null);
         }
     }
 
-    public GenericResponse<byte[]> generateBarcodeImageForPatrimonialCode(String codigoPatrimonial) {
-        Optional<equipo> informacion = equipoRepository.findByCodigoPatrimonial(codigoPatrimonial);
+
+    public GenericResponse<byte[]> generateBarcodeImageForPatrimonialCode(String assetCode) {
+        Optional<Equipment> informacion = equipoRepository.findByBarcode(assetCode);
         if (informacion.isPresent()) {
             try {
-                equipo info = informacion.get();
-                String barcodeData = info.getCodigoBarra();  // Use only the barcode number
+                Equipment info = informacion.get();
+                String barcodeData = info.getBarcode();  // Use only the barcode number
                 return new GenericResponse<>("SUCCESS", Global.RPTA_OK, "Código de barras generado exitosamente", generateBarcodeImage(barcodeData));
             } catch (Exception e) {
                 return new GenericResponse<>("ERROR", Global.RPTA_ERROR, "Error al generar el código de barras: " + e.getMessage(), null);
@@ -156,6 +172,7 @@ public class EquipoService {
             return new GenericResponse<>("ERROR", Global.RPTA_ERROR, "No se encontró información para el código patrimonial proporcionado", null);
         }
     }
+
     private byte[] generateBarcodeImage(String data) throws Exception {
         MultiFormatWriter barcodeWriter = new MultiFormatWriter();
         BitMatrix bitMatrix = barcodeWriter.encode(data, BarcodeFormat.CODE_128, 300, 100);
@@ -175,7 +192,7 @@ public class EquipoService {
         g.drawImage(barcodeImage, 0, 20, null);
         g.setColor(java.awt.Color.BLACK);
         g.setFont(new java.awt.Font(java.awt.Font.SANS_SERIF, java.awt.Font.PLAIN, 12));
-        
+
         // Draw text below barcode
         FontMetrics fontMetrics = g.getFontMetrics();
         int textWidth = fontMetrics.stringWidth(data);
@@ -191,24 +208,29 @@ public class EquipoService {
             return pngOutputStream.toByteArray();
         }
     }
+
     // Método para generar el Excel
     public byte[] generateExcelReport() throws Exception {
-        List<equipo> equipos = (List<equipo>) equipoRepository.findAll();
+        List<Equipment> equipos = (List<Equipment>) equipoRepository.findAll();
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet("Equipos");
+            Sheet sheet = workbook.createSheet("Equipment");
 
             // Insertar el logo
-            FileInputStream inputStream = new FileInputStream("src/main/resources/logo.png");
-            byte[] bytes = IOUtils.toByteArray(inputStream);
-            int pictureIdx = workbook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
-            inputStream.close();
-            CreationHelper helper = workbook.getCreationHelper();
-            Drawing<?> drawing = sheet.createDrawingPatriarch();
-            ClientAnchor anchor = helper.createClientAnchor();
-            anchor.setCol1(0);
-            anchor.setRow1(0);
-            Picture pict = drawing.createPicture(anchor, pictureIdx);
-            pict.resize();
+            try (FileInputStream inputStream = new FileInputStream("src/main/resources/logo.png")) {
+                byte[] bytes = IOUtils.toByteArray(inputStream);
+                int pictureIdx = workbook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
+                CreationHelper helper = workbook.getCreationHelper();
+                Drawing<?> drawing = sheet.createDrawingPatriarch();
+                ClientAnchor anchor = helper.createClientAnchor();
+                anchor.setCol1(0); // Columna A
+                anchor.setRow1(0); // Fila 1
+                anchor.setCol2(3); // Extender a la columna D
+                anchor.setRow2(10); // Extender a la fila 10
+                Picture pict = drawing.createPicture(anchor, pictureIdx);
+                // Ajustar la imagen a 135x135 píxeles
+                pict.resize(1);
+                pict.resize(75 / pict.getImageDimension().getWidth(), 58 / pict.getImageDimension().getHeight());
+            }
 
             // Crear un estilo para el título
             CellStyle titleStyle = workbook.createCellStyle();
@@ -255,26 +277,25 @@ public class EquipoService {
 
             // Llenar datos a partir de la fila 7
             int rowIdx = 6;
-            for (BUEN_PASTOR.Entity.equipo equipo : equipos) {
+            for (Equipment equipment : equipos) {
                 Row row = sheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(equipo.getId());
-                row.createCell(1).setCellValue(equipo.getTipoEquipo());
-                row.createCell(2).setCellValue(equipo.getCodigoBarra());
-                row.createCell(3).setCellValue(equipo.getCodigoPatrimonial());
-                row.createCell(4).setCellValue(equipo.getDescripcion());
-                row.createCell(5).setCellValue(equipo.getEstado());
-                row.createCell(6).setCellValue(equipo.getFechaCompra().toString());
-                row.createCell(7).setCellValue(equipo.getMarca());
-                row.createCell(8).setCellValue(equipo.getModelo());
-                row.createCell(9).setCellValue(equipo.getNombreEquipo());
-                row.createCell(10).setCellValue(equipo.getNumeroOrden());
-                row.createCell(11).setCellValue(equipo.getSerie());
-                row.createCell(12).setCellValue(equipo.getResponsable() != null ? equipo.getResponsable().getNombre() : "-");
-                row.createCell(13).setCellValue(equipo.getResponsable() != null ? equipo.getResponsable().getCargo() : "-");
-                row.createCell(14).setCellValue(equipo.getUbicacion() != null ? equipo.getUbicacion().getAmbiente() : "-");
-                row.createCell(15).setCellValue(equipo.getUbicacion() != null ? equipo.getUbicacion().getUbicacionFisica() : "-");
+                row.createCell(0).setCellValue(equipment.getId());
+                row.createCell(1).setCellValue(equipment.getEquipmentType());
+                row.createCell(2).setCellValue(equipment.getBarcode());
+                row.createCell(3).setCellValue(equipment.getAssetCode());
+                row.createCell(4).setCellValue(equipment.getDescription());
+                row.createCell(5).setCellValue(equipment.getStatus());
+                row.createCell(6).setCellValue(equipment.getPurchaseDate().toString());
+                row.createCell(7).setCellValue(equipment.getBrand());
+                row.createCell(8).setCellValue(equipment.getModel());
+                row.createCell(9).setCellValue(equipment.getEquipmentName());
+                row.createCell(10).setCellValue(equipment.getOrderNumber());
+                row.createCell(11).setCellValue(equipment.getSerial());
+                row.createCell(12).setCellValue(equipment.getResponsible() != null ? equipment.getResponsible().getFullName() : "-");
+                row.createCell(13).setCellValue(equipment.getResponsible() != null ? equipment.getResponsible().getPosition() : "-");
+                row.createCell(14).setCellValue(equipment.getLocation() != null ? equipment.getLocation().getRoom() : "-");
+                row.createCell(15).setCellValue(equipment.getLocation() != null ? equipment.getLocation().getPhysicalLocation() : "-");
             }
-
 
             // Ajuste automático de tamaño de columnas
             for (int i = 0; i < columns.length; i++) {
@@ -289,9 +310,10 @@ public class EquipoService {
     }
 
 
-    public GenericResponse<equipo> getEquipoById(int id) {
+
+    public GenericResponse<Equipment> getEquipoById(int id) {
         try {
-            equipo equipo = equipoRepository.findByIdWithDetails(id);
+            Equipment equipo = equipoRepository.findByIdWithDetails(id);
             if (equipo != null) {
                 return new GenericResponse<>(Global.TIPO_DATA, Global.RPTA_OK, Global.OPERACION_CORRECTA, equipo);
             } else {
@@ -302,27 +324,27 @@ public class EquipoService {
         }
     }
 
-    public GenericResponse<List<equipo>> filtroPorNombre(String nombreEquipo) {
+    public GenericResponse<List<Equipment>> filtroPorNombre(String nombreEquipo) {
         try {
-            List<equipo> equipos = equipoRepository.findByNombreEquipoContaining(nombreEquipo);
+            List<Equipment> equipos = equipoRepository.findByEquipmentNameContaining(nombreEquipo);
             return new GenericResponse<>(Global.TIPO_DATA, Global.RPTA_OK, Global.OPERACION_CORRECTA, equipos);
         } catch (Exception e) {
             return new GenericResponse<>(Global.TIPO_ERROR, Global.RPTA_ERROR, Global.OPERACION_ERRONEA, null);
         }
     }
 
-    public GenericResponse<List<equipo>> filtroCodigoPatrimonial(String codigoPatrimonial) {
+    public GenericResponse<List<Equipment>> filtroCodigoPatrimonial(String assetCode) {
         try {
-            List<equipo> equipos = equipoRepository.findByCodigoPatrimonialContaining(codigoPatrimonial);
+            List<Equipment> equipos = equipoRepository.findByAssetCodeContaining(assetCode);
             return new GenericResponse<>(Global.TIPO_DATA, Global.RPTA_OK, Global.OPERACION_CORRECTA, equipos);
         } catch (Exception e) {
             return new GenericResponse<>(Global.TIPO_ERROR, Global.RPTA_ERROR, Global.OPERACION_ERRONEA, null);
         }
     }
 
-    public GenericResponse<List<equipo>> filtroFechaCompraBetween(LocalDate fechaInicio, LocalDate fechaFin) {
+    public GenericResponse<List<Equipment>> filtroFechaCompraBetween(LocalDate fechaInicio, LocalDate fechaFin) {
         try {
-            List<equipo> equipos = equipoRepository.findByFechaCompraBetween(fechaInicio, fechaFin);
+            List<Equipment> equipos = equipoRepository.findByPurchaseDateBetween(fechaInicio, fechaFin);
             return new GenericResponse<>(Global.TIPO_DATA, Global.RPTA_OK, Global.OPERACION_CORRECTA, equipos);
         } catch (Exception e) {
             return new GenericResponse<>(Global.TIPO_ERROR, Global.RPTA_ERROR, Global.OPERACION_ERRONEA, null);

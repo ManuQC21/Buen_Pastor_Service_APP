@@ -1,6 +1,6 @@
 package BUEN_PASTOR.Controller;
 
-import BUEN_PASTOR.Entity.usuario;
+import BUEN_PASTOR.Entity.Member;
 import BUEN_PASTOR.Service.UsuarioService;
 import BUEN_PASTOR.utils.GenericResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +14,12 @@ public class UsuarioController {
     private UsuarioService service;
 
     @PostMapping("/registro")
-    public GenericResponse<usuario> register(@RequestBody usuario usuario) {
-        return service.register(usuario);
+    public GenericResponse<Member> register(@RequestBody Member member) {
+        return service.register(member);
     }
 
     @PostMapping("/login")
-    public GenericResponse<usuario> login(@RequestParam("correo") String correo, @RequestParam("clave") String clave) {
-        return service.login(correo, clave);
+    public GenericResponse<Member> login(@RequestParam("email") String email, @RequestParam("password") String password) {
+        return service.login(email, password);
     }
 }
